@@ -16,3 +16,5 @@ easyocr
 
 torch
 transformers
+
+faiss-gpu-cu12

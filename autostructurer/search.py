@@ -1,15 +1,11 @@
 import numpy as np
 from autostructurer.pack4bit import unpack_4bit
 
-def load_vectors(rows):
-    ids, vecs = [], []
-    for chunk_id, dim, packed, scale, zero in rows:
-        v = unpack_4bit(packed, dim, scale, zero)
-        ids.append(chunk_id)
+def unpack_vectors_for_search(rows):
+    # rows: (vector_id, chunk_id, dim, packed, scale, zero)
+    vecs=[]
+    for r in rows:
+        dim=r[2]; packed=r[3]; scale=r[4]; zero=r[5]
+        v=unpack_4bit(packed, dim, scale, zero)
         vecs.append(v)
-    return ids, np.vstack(vecs)
-
-def cosine_search(query_vec, vecs, ids, top_k=10):
-    scores = vecs @ query_vec
-    idx = np.argsort(-scores)[:top_k]
-    return [(ids[i], float(scores[i])) for i in idx]
+    return np.vstack(vecs).astype(np.float32)

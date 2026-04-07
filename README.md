@@ -1,43 +1,49 @@
-# AutoStructurer-v4 (GPU)
+# AutoStructurer-v5 (Linux CUDA, IVF-PQ)
 
-Universal unstructured → structured memory system with:
-- Whisper transcription (video/audio)
-- OCR extraction (EasyOCR)
-- Scene detection for keyframes
-- Text embeddings (SentenceTransformer)
-- CLIP embeddings for images/video frames
-- Frame deduplication using perceptual hash
+Production-grade ingestion + indexing system for unstructured data:
+- Text/PDF/Image/Video ingestion
+- Whisper transcript extraction (GPU)
+- OCR (EasyOCR GPU)
+- Scene keyframes
+- Batch embedding (SentenceTransformer + CLIP)
+- FAISS GPU IVF-PQ index (text + clip)
 - SQLite metadata store
-- Packed 4-bit embeddings for storage
+- Topic centroid incremental assignment
+- Memory decay
+- Contradiction graph (rule-based MVP)
+- Export to TurboMemory `.tm` bundle + zip
 
-## Install
+## Install (Linux CUDA)
 ```bash
+sudo apt install ffmpeg
 pip install -r requirements.txt
 ```
 
-Linux:
+If `faiss-gpu-cu12` doesn't match your CUDA version, install FAISS GPU via conda.
+
+## Run daemon (watch folder)
 ```bash
-sudo apt install ffmpeg
+mkdir -p inbox
+python daemon.py --watch inbox --db memory.sqlite --gpu
 ```
 
-## Ingest
+Drop files into `inbox/` (mp4/pdf/png/txt/etc).
+
+## Ingest single file
 ```bash
-python cli.py ingest demo.mp4 --db memory.db
-python cli.py ingest contract.pdf --db memory.db
-python cli.py ingest slide.png --db memory.db
+python cli.py ingest myvideo.mp4 --db memory.sqlite --gpu
 ```
 
-## Search (hybrid)
+## Search
 ```bash
-python cli.py search "compression ratio slide" --db memory.db --mode hybrid
+python cli.py search "compression ratio slide" --db memory.sqlite --mode hybrid --top-k 10
 ```
 
-## Search (visual-only CLIP)
+## Export `.tm` and zip
 ```bash
-python cli.py search "a chart on a presentation slide" --db memory.db --mode clip
+python cli.py export --db memory.sqlite --out memory.tm --zip export.zip
 ```
 
-## Search (text-only)
-```bash
-python cli.py search "invoice payment eur" --db memory.db --mode text
-```
+## Notes
+- IVF-PQ needs training. This system auto-trains once it has enough vectors.
+- For small datasets, it falls back to FlatIP until trained.

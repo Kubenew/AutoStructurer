@@ -1,1 +1,1 @@
-from autostructurer.pipeline import AutoStructurer
+from autostructurer.pipeline import AutoStructurerV5
