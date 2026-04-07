@@ -1,0 +1,1 @@
+from autostructurer.pipeline import AutoStructurer
